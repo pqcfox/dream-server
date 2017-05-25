@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+"""Usage: dreamserver train <image_dir> <network_path>
+       dreamserver run
+"""
+
+if __name__ == '__main__':
+    version = get_distribution('dream-server').version
+    cli_args = docopt(__doc__, version=version)
+    args = rcfile(basename(__file__), cli_args)
+    run(args)
