@@ -273,7 +273,6 @@ layer {
   type: "InnerProduct"
   bottom: "fc6"
   top: "fc7"
-  # Note that lr_mult can be set to 0 to disable any fine-tuning of this, and any other, layer
   param {
     lr_mult: 1
     decay_mult: 1
@@ -310,11 +309,10 @@ layer {
   }
 }
 layer {
-  name: "fc8_flickr"
+  name: "fc8_dreamnet"
   type: "InnerProduct"
   bottom: "fc7"
-  top: "fc8_flickr"
-  # lr_mult is set to higher than for other layers, because this layer is starting from random while the others are already trained
+  top: "fc8_dreamnet"
   param {
     lr_mult: 10
     decay_mult: 1
@@ -338,6 +336,6 @@ layer {
 layer {
   name: "prob"
   type: "Softmax"
-  bottom: "fc8_flickr"
+  bottom: "fc8_dreamnet"
   top: "prob"
 }
