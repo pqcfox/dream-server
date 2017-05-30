@@ -25,7 +25,8 @@ def run(args):
             time.sleep(5)
 	    continue
         pull_image_path = pull_frame(bucket)
-        push_image_path = run_network(pull_image_path, bucket, bc) 
+        push_image_path = run_network(pull_image_path, int(args['iterations']),
+                                      int(args['octaves']), bucket, bc) 
         push_frame(push_image_path, bucket)
 
 
@@ -36,9 +37,10 @@ def pull_frame(bucket):
     return pull_image.name
 
 
-def run_network(pull_image_path, bucket, bc):
+def run_network(pull_image_path, iter_n, octave_n, bucket, bc):
     pull_image = Image.open(pull_image_path)
-    push_image_array = bc.dream(np.float32(pull_image))
+    push_image_array = bc.dream(np.float32(pull_image), iter_n=iter_n, 
+                                octave_n=octave_n)
     push_image = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
     result = Image.fromarray(np.uint8(push_image_array))
     result.save(push_image.name)

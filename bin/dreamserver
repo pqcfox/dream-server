@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 """Usage: dreamserver [--network <path>] [--bucket-name <name>]
+       dreamserver (-h | --help)
+       dreamserver --version
 """
 
 from os.path import basename
