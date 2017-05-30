@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-"""Usage: dreamserver train <image_dir> <network_path>
-       dreamserver run
+"""Usage: dreamserver [--network <path>] [--bucket-name <name>]
 """
 
 from os.path import basename

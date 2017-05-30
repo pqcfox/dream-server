@@ -1,39 +1,41 @@
+import os.path
+import shutil
+import tempfile
+
+import batcountry
 import boto3
 import caffe
-import shutil
+import numpy as np
+from PIL import Image
 
 S3_PULL_KEY = 'dream_up.jpg'
 S3_PUSH_KEY = 'dream_down.jpg'
-TRAIN_VAL_FILE = 'train_val.prototxt'
-DEPLOY_FILE = 'deploy.prototxt'
-SOLVER_FILE = 'solver.prototxt'
-OUTPUT_FILE = 'output.jpg' 
-
-s3 = boto3.resource('s3')
 
 
 def run(args):
-    if args['run']:
-        bucket = s3.Bucket(args['bucket-name'])
-        pull_frame(bucket, args['work-dir'])
-        run_networks(args['work-dir']) 
-        push_frame(bucket)
-    elif args['train']:
-        copy_network_data()
-        fine_tune()
+    bc = batcountry.BatCountry(args['network'])
+    s3 = boto3.resource('s3')
+    bucket = s3.Bucket(args['bucket-name'])
+    pull_image_path = pull_frame(bucket)
+    push_image_path = run_network(pull_image_path, bucket, bc) 
+    push_frame(push_image_path, bucket)
 
 
-def pull_frame(bucket, work_dir):
-    bucket.download_file(S3_PULL_KEY, work_dir)
+def pull_frame(bucket):
+    pull_image = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+    bucket.download_file(S3_PULL_KEY, pull_image.name)
+    return pull_image.name
 
 
-def run_networks(work_dir):
-    pass
+def run_network(pull_image_path, bucket, bc):
+    pull_image = Image.open(pull_image_path)
+    push_image_array = bc.dream(np.float32(pull_image))
+    bc.cleanup()
+    push_image = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+    result = Image.fromarray(np.uint8(push_image_array))
+    result.save(push_image.name)
+    return push_image.name
 
 
-def push_frame(bucket):
-    bucket.upload_file(OUTPUT_FILE, S3_PUSH_KEY)
-
-
-def fine_tune():
-    pass
+def push_frame(push_image_path, bucket):
+    bucket.upload_file(push_image_path, S3_PUSH_KEY)
